@@ -15,6 +15,7 @@ import math
 from pathlib import Path
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+# %matplotlib inline
 
 # import matplotlib
 import numpy as np
@@ -39,8 +40,13 @@ from textstat import flesch_reading_ease
 
 import nltk
 nltk.download('stopwords')
+
+import time
+time.sleep(3)
 stop=set(stopwords.words('english'))
 nltk.download('punkt')
+
+print("hi")
 
 st.title("🎈 My new app")
 st.write(
@@ -67,6 +73,14 @@ def st_plot(use_cont_width = True):
 
     fig = plt.gcf()
     st.plotly_chart(fig, use_container_width = use_cont_width)
+
+# work on this later
+# intended for sns plot to be shown by uding
+def st_sns_plot(figName, use_cont_width = True):
+
+    fig = figName.get_figure()
+    st.plotly_chart(fig, use_container_width = use_cont_width)
+
 
 # Plots headline lengths
 text = news['headline_text']
@@ -263,7 +277,10 @@ def ner(text):
     return [X.label_ for X in doc.ents]
 
 print("4.1")
-ent=news['headline_text'].apply(lambda x : ner(x))
+
+# NOTE: takes long time bc runs this for all headlines! (count: 10,000)
+# NOTE: bc of the time, I changed this to only process the first 100 headlines
+ent=news['headline_text'][0:100].apply(lambda x : ner(x))
 print("4.5")
 ent=[x for sub in ent for x in sub]
 
@@ -278,28 +295,42 @@ import spacy
 from collections import  Counter
 import seaborn as sns
 
-def plot_named_entity_barchart(text):
+global countE
+countE = 0
+def st_plot_named_entity_barchart(text):
     nlp = spacy.load("en_core_web_sm")
-
+    global countE
     def _get_ner(text):
         doc = nlp(text)
         return [X.label_ for X in doc.ents]
 
+    countE = countE + 1
+
+    print("this is", countE + 0.1)
     ent=text.apply(lambda x : _get_ner(x))
+    print("this is", countE + 0.2)
     ent=[x for sub in ent for x in sub]
+    print("this is", countE + 0.3)
     counter=Counter(ent)
+    print("this is", countE + 0.4)
     count=counter.most_common()
 
     x,y=map(list,zip(*count))
-    sns.barplot(x=y,y=x)
+    bob = sns.barplot(x=y,y=x)
+    print("bob type: ", type(bob))
+    st_sns_plot(bob)
 
-plot_named_entity_barchart(news['headline_text'])
+print("plot entity barchart")
+
+# NOTE: ONLY DID FIRST 100
+st_plot_named_entity_barchart(news['headline_text'][0:100])
+print("yes")
 
 import spacy
 from collections import  Counter
 import seaborn as sns
 
-def plot_most_common_named_entity_barchart(text, entity="PERSON"):
+def st_plot_most_common_named_entity_barchart(text, entity="PERSON"):
     nlp = spacy.load("en_core_web_sm")
 
     def _get_ner(text,ent):
@@ -311,9 +342,12 @@ def plot_most_common_named_entity_barchart(text, entity="PERSON"):
 
     counter=Counter(entity_filtered)
     x,y=map(list,zip(*counter.most_common(10)))
-    sns.barplot(x = y, y = x).set_title(entity)
+    bob = sns.barplot(x = y, y = x).set_title(entity)
+    
+    st_sns_plot(bob)
 
-plot_most_common_named_entity_barchart(news['headline_text'], entity="PERSON")
+# NOTE: ONLY DID FIRST 100
+st_plot_most_common_named_entity_barchart(news['headline_text'][0:100], entity="PERSON")
 
 
 # Code Snippet for Most Common Named Entity Barchart
@@ -322,7 +356,7 @@ import spacy
 from collections import  Counter
 import seaborn as sns
 
-def plot_most_common_named_entity_barchart(text, entity="PERSON"):
+def st_plot_most_common_named_entity_barchart(text, entity="PERSON"):
     nlp = spacy.load("en_core_web_sm")
 
     def _get_ner(text,ent):
@@ -334,13 +368,17 @@ def plot_most_common_named_entity_barchart(text, entity="PERSON"):
 
     counter=Counter(entity_filtered)
     x,y=map(list,zip(*counter.most_common(10)))
-    sns.barplot(x = y, y = x).set_title(entity)
+    bob = sns.barplot(x = y, y = x).set_title(entity)
+    
+    st_sns_plot(bob)
 
-plot_most_common_named_entity_barchart(news['headline_text'], entity="PERSON")
+# NOTE: ONLY DID FIRST 100
+st_plot_most_common_named_entity_barchart(news['headline_text'][0:100], entity="PERSON")
 
 
 # * EXPLORATION THROUGH PARTS OF SPEECH TAGGING *
 import nltk
+from nltk.tokenize import word_tokenize
 nltk.download('averaged_perceptron_tagger')
 
 sentence="The greatest comeback stories in 2019"
@@ -352,7 +390,7 @@ from nltk.tokenize import word_tokenize
 import seaborn as sns
 from collections import Counter
 
-def plot_parts_of_speach_barchart(text):
+def st_plot_parts_of_speach_barchart(text):
     nltk.download('averaged_perceptron_tagger')
 
     def _get_pos(text):
@@ -365,9 +403,11 @@ def plot_parts_of_speach_barchart(text):
     counter=Counter(tags)
     x,y=list(map(list,zip(*counter.most_common(7))))
 
-    sns.barplot(x=y,y=x)
+    bob = sns.barplot(x=y,y=x)
+    
+    st_sns_plot(bob)
 
-plot_parts_of_speach_barchart(news['headline_text'])
+st_plot_parts_of_speach_barchart(news['headline_text'][0:100])
 
 
 # Code Snippet for Most Common Part of Speach Barchart
@@ -377,7 +417,7 @@ from nltk.tokenize import word_tokenize
 import seaborn as sns
 from collections import Counter
 
-def plot_most_common_part_of_speach_barchart(text, part_of_speach='NN'):
+def st_plot_most_common_part_of_speach_barchart(text, part_of_speach='NN'):
     nltk.download('averaged_perceptron_tagger')
 
     def _filter_pos(text):
@@ -393,12 +433,39 @@ def plot_most_common_part_of_speach_barchart(text, part_of_speach='NN'):
     words=[x for l in words for x in l]
     counter=Counter(words)
     x,y=list(map(list,zip(*counter.most_common(7))))
-    sns.barplot(x=y,y=x).set_title(part_of_speach)
+    bob = sns.barplot(x=y,y=x).set_title(part_of_speach)
 
-plot_most_common_part_of_speach_barchart(news['headline_text'])
+    st_sns_plot(bob)
 
+st_plot_most_common_part_of_speach_barchart(news['headline_text'][0:100])
+
+# We are on this part, exploring through text complexity
 # * EXPLORING THROUGH TEXT COMPLEXITY *
 
+# Code Snippet for Text Complexity Histogram
+
+# need to fix - problem is overlapping bins
+# Error Message:
+# ValueError: Invalid value of type 'numpy.float64'
+#  received for the 'bargap' property of layout
+#  Received value: -1.1368683772161603e-13 The
+#  'bargap' property is a number and may be specified
+#  as: - An int or float in the interval [0, 1]
+_ = '''
+from textstat import flesch_reading_ease
+
+def st_plot_text_complexity_histogram(text):
+    reading = text.apply(lambda x : flesch_reading_ease(x))
+    reading.hist()
+    st_plot(False)
+
+
+st_plot_text_complexity_histogram(news['headline_text'])
+
+x = [i for i in range(len(reading)) if reading[i]<5]
+news.iloc[x]['headline_text'].head()
+
+'''
 
 # hey, setting the block comment to a variable named _ will prevent
 # streamlit from showing everything in the block comment
